@@ -273,7 +273,7 @@
       color: #f87171;
     }
 
-    /* 컨트롤 영역 (조이스틱만 단독 배치) */
+    /* 컨트롤 영역 */
     #controlArea {
       position: absolute;
       bottom: 0;
@@ -284,10 +284,11 @@
       z-index: 5;
     }
 
+    /* 요구사항 1: 조이스틱을 우측 하단으로 이동 (right: 25px) */
     #joystick {
       position: absolute;
       bottom: 50px;
-      left: 20px;
+      right: 25px;
       width: 100px;
       height: 100px;
       background: rgba(255, 255, 255, 0.15);
@@ -341,15 +342,15 @@
     <div id="startScreen" class="screen">
       <h1>은하 수호대<br><span style="font-size:1.1rem; color:#93c5fd;">: 은하계를 지켜라</span></h1>
       
-      <!-- 요구사항 2: 업데이트 현황 버튼 -->
       <button class="btn btn-update" onclick="toggleModal(true)">📢 업데이트 현황 (패치노트)</button>
 
+      <!-- 요구사항 2: 변경된 아이템 확률 표시 -->
       <div class="info-box">
         <h4>🎁 아이템 드롭 확률 정보</h4>
-        <div class="info-item"><span class="badge upgrade">2X</span><span><b>탄환 수 증가 (3%)</b>: 발사 탄환 수 +1</span></div>
-        <div class="info-item"><span class="badge shotgun">G</span><span><b>샷건 무기 (2%)</b>: 소형 2연발 방사 탄환</span></div>
-        <div class="info-item"><span class="badge laser">L</span><span><b>레이저 무기 (5%)</b>: 관통 빔</span></div>
-        <div class="info-item"><span class="badge saw">S</span><span><b>톱니바퀴 무기 (5%)</b>: 다단히트 회전탄</span></div>
+        <div class="info-item"><span class="badge upgrade">2X</span><span><b>탄환 수 증가 (5%)</b>: 발사 탄환 수 +1</span></div>
+        <div class="info-item"><span class="badge shotgun">G</span><span><b>샷건 무기 (4%)</b>: 소형 2연발 방사 탄환</span></div>
+        <div class="info-item"><span class="badge laser">L</span><span><b>레이저 무기 (7%)</b>: 관통 빔</span></div>
+        <div class="info-item"><span class="badge saw">S</span><span><b>톱니바퀴 무기 (7%)</b>: 다단히트 회전탄</span></div>
       </div>
 
       <div class="ranking-container">
@@ -372,16 +373,16 @@
       <div class="credits">[만든이 : YYR]</div>
     </div>
 
-    <!-- 요구사항 2: 업데이트 현황 모달 팝업 창 -->
+    <!-- 패치노트 모달 팝업 창 -->
     <div id="updateModal" class="hidden">
       <div class="modal-content">
         <h3>🚀 최근 패치 노트</h3>
         <ul>
-          <li><b>자동 사격 시스템 적용</b>: FIRE 버튼 없이 기본 탄환이 항상 자동 발사됩니다.</li>
-          <li><b>조작 편의성 강화</b>: FIRE 버튼이 삭제되어 조이스틱으로 더 넓은 화면 조작이 가능합니다.</li>
-          <li><b>모바일 스크롤 방지</b>: 터치 조작 시 화면 스크롤 및 튀김 현상을 완벽히 차단했습니다.</li>
-          <li><b>조이스틱 개선</b>: 커진 조이스틱 반경과 50% 반투명 처리로 플레이 가시성을 확보했습니다.</li>
-          <li><b>보스 밸런스 조정</b>: 보스 체력 3배 증대 및 20킬마다 연속 등장 시스템이 적용되었습니다.</li>
+          <li><b>조이스틱 우측 이동</b>: 우측 하단으로 배치하여 조작 편의성을 극대화했습니다.</li>
+          <li><b>아이템 확률 상향</b>: 모든 아이템 등장 확률이 각각 +2% 상승했습니다.</li>
+          <li><b>부드러운 움직임 적용</b>: 비행기 이동 시 관성이 적용되어 더욱 매끄럽게 조작됩니다.</li>
+          <li><b>자동 사격 시스템</b>: FIRE 버튼 없이 기본 탄환이 상시 자동 발사됩니다.</li>
+          <li><b>모바일 스크롤 방지</b>: 터치 조작 시 화면 스크롤 현상을 방지했습니다.</li>
         </ul>
         <div style="text-align: center; margin-top: 15px;">
           <button class="btn" style="padding: 6px 20px; font-size: 0.9rem;" onclick="toggleModal(false)">닫기</button>
@@ -412,7 +413,7 @@
       <button class="btn" style="background: linear-gradient(135deg, #475569, #334155);" onclick="goToMainScreen()">메인 화면으로</button>
     </div>
 
-    <!-- 컨트롤 영역 (요구사항 1: FIRE 버튼 삭제 후 조이스틱 전용 영역) -->
+    <!-- 컨트롤 영역 -->
     <div id="controlArea" class="hidden">
       <div id="joystick">
         <div id="joystickStick"></div>
@@ -422,7 +423,6 @@
   </div>
 
   <script>
-    // 브라우저 터치 스크롤 차단
     document.addEventListener("touchmove", (e) => {
       if (e.target.closest('.screen') || e.target.closest('#updateModal')) return; 
       e.preventDefault();
@@ -474,12 +474,16 @@
     let bossSpawnCount = 0;  
     let enemyBullets = [];
 
+    // 요구사항 3: 비행기의 부드러운 이동을 위한 속도 벡터 변수(vx, vy) 추가
     const player = { 
       x: 0, 
       y: 0, 
+      vx: 0,
+      vy: 0,
       width: 28, 
       height: 28, 
-      speed: 5 
+      maxSpeed: 5.5,
+      smoothness: 0.2 // 보간 계수
     };
 
     let bullets = [];
@@ -488,9 +492,8 @@
     let keys = {};
 
     let lastShootTime = 0;
-    const shootInterval = 120; // 발사 속도 간격 (ms)
+    const shootInterval = 120;
 
-    // 모달 팝업 제어
     function toggleModal(show) {
       if (show) {
         updateModal.classList.remove("hidden");
@@ -799,6 +802,8 @@
 
       player.x = canvas.width / 2 - player.width / 2;
       player.y = canvas.height - player.height - 60;
+      player.vx = 0;
+      player.vy = 0;
 
       score = 0;
       stage = 1;
@@ -887,11 +892,12 @@
       if (forcedType) {
         items.push({ x, y, width: 22, height: 22, speed: 1.5, type: forcedType });
       } else {
+        // 요구사항 2: 변경된 상향 확률에 따른 비중 계산
         const randWeapon = Math.random();
         let weaponType = "laser";
-        if (randWeapon < 0.166) weaponType = "shotgun";
-        else if (randWeapon < 0.583) weaponType = "saw";
-        else weaponType = "laser";
+        if (randWeapon < 0.222) weaponType = "shotgun"; // 4/18
+        else if (randWeapon < 0.611) weaponType = "saw"; // 7/18
+        else weaponType = "laser";                       // 7/18
 
         items.push({ x, y, width: 22, height: 22, speed: 1.5, type: weaponType });
       }
@@ -969,7 +975,6 @@
 
       gameTime++;
 
-      // 요구사항 1: 버튼 클릭 없이 상시 자동 사격
       const now = Date.now();
       if (now - lastShootTime > shootInterval) {
         shoot();
@@ -986,20 +991,25 @@
         nextBossKillTarget += 20;
       }
 
-      let moveX = 0;
-      let moveY = 0;
-      if (keys["ArrowLeft"] || keys["KeyA"]) moveX -= 1;
-      if (keys["ArrowRight"] || keys["KeyD"]) moveX += 1;
-      if (keys["ArrowUp"] || keys["KeyW"]) moveY -= 1;
-      if (keys["ArrowDown"] || keys["KeyS"]) moveY += 1;
+      // 목표 속도 계산
+      let targetVx = 0;
+      let targetVy = 0;
+      if (keys["ArrowLeft"] || keys["KeyA"]) targetVx -= player.maxSpeed;
+      if (keys["ArrowRight"] || keys["KeyD"]) targetVx += player.maxSpeed;
+      if (keys["ArrowUp"] || keys["KeyW"]) targetVy -= player.maxSpeed;
+      if (keys["ArrowDown"] || keys["KeyS"]) targetVy += player.maxSpeed;
 
       if (joystickActive) {
-        moveX = joystickX / joystickRadius;
-        moveY = joystickY / joystickRadius;
+        targetVx = (joystickX / joystickRadius) * player.maxSpeed;
+        targetVy = (joystickY / joystickRadius) * player.maxSpeed;
       }
 
-      player.x += moveX * player.speed;
-      player.y += moveY * player.speed;
+      // 요구사항 3: 부드러운 가감속 보간(Lerp) 적용
+      player.vx += (targetVx - player.vx) * player.smoothness;
+      player.vy += (targetVy - player.vy) * player.smoothness;
+
+      player.x += player.vx;
+      player.y += player.vy;
       
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
       
@@ -1143,11 +1153,12 @@
               killCount++;
               score += m.type === "fast" ? 150 : (m.type === "shooter" ? 200 : 100);
 
+              // 요구사항 2: 탄환 5%, 나머지 무기 총 18% 적용
               const randItem = Math.random();
-              if (randItem < 0.03) {
+              if (randItem < 0.05) {
                 spawnItem(m.x, m.y, "upgrade");
               } 
-              else if (randItem < 0.15) {
+              else if (randItem < 0.23) {
                 spawnItem(m.x, m.y);
               }
 
