@@ -380,7 +380,7 @@
     let isGameOver = false;
     let gameAnimationId;
     let gameTime = 0;
-    let killCount = 0; // 몬스터 킬 횟수
+    let killCount = 0;
     let nextBossKillTarget = 20; 
     let bulletCount = 1;
 
@@ -723,7 +723,8 @@
       resizeCanvas();
 
       player.x = canvas.width / 2 - player.width / 2;
-      player.y = canvas.height - player.height - 25;
+      // 하단 한계선 영역 상단 위치에 초기 스폰
+      player.y = canvas.height - player.height - 50;
 
       score = 0;
       stage = 1;
@@ -787,7 +788,7 @@
         type: type,
         hp: hp,
         lastShoot: 0,
-        pendingSecondShot: 0 // 세로 연발 사격용 타이머
+        pendingSecondShot: 0
       });
     }
 
@@ -924,8 +925,13 @@
 
       player.x += moveX * player.speed;
       player.y += moveY * player.speed;
+      
+      // 좌우 이동 경계 제한
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
-      player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+      
+      // 상하 이동 경계 제한 (요구사항: 모바일 조이스틱 패널 영역 및 화면 최하단으로 들어가지 못하도록 50px 한계 지정)
+      const bottomBoundary = canvas.height - player.height - 50;
+      player.y = Math.max(0, Math.min(bottomBoundary, player.y));
 
       for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
@@ -1018,12 +1024,10 @@
           m.x = m.startX + Math.sin(m.y * 0.05) * 40;
         }
 
-        // 요구사항 2: 슈터 몬스터 세로 시차 연발 사격 로직 재설정
         const shooterInterval = Math.max(40, 100 - (stage - 1) * 8);
         const bulletSpeed = 3.5 + (stage - 1) * 0.3;
 
         if (m.type === "shooter") {
-          // 1차 총알 발사
           if (gameTime - m.lastShoot > shooterInterval) {
             enemyBullets.push({
               x: m.x + m.width / 2 - 3,
@@ -1034,10 +1038,9 @@
               vy: bulletSpeed
             });
             m.lastShoot = gameTime;
-            m.pendingSecondShot = 12; // 12프레임 뒤 2번째 총알 발사 예약
+            m.pendingSecondShot = 12;
           }
 
-          // 시간차 2차 총알 발사 (세로 간격을 두고 차례로 날아감)
           if (m.pendingSecondShot > 0) {
             m.pendingSecondShot--;
             if (m.pendingSecondShot === 0) {
@@ -1064,7 +1067,7 @@
             m.hp--;
 
             if (m.hp <= 0) {
-              killCount++; // 처치 카운트 누적
+              killCount++;
               score += m.type === "fast" ? 150 : (m.type === "shooter" ? 200 : 100);
 
               const randItem = Math.random();
@@ -1116,7 +1119,6 @@
         drawBoss(ctx, boss);
       }
 
-      // 요구사항 1: 메인 플레이 화면 좌측 상단에 킬 횟수(Kills) 상시 표기
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "left";
