@@ -669,9 +669,9 @@
 
       player.width = Math.min(40, canvas.width * 0.1);
       player.height = Math.min(24, canvas.height * 0.04);
-      player.speed = 3; // 속도를 고정값으로 설정 (느리게)
+      player.speed = 3;
       player.x = (canvas.width - player.width) / 2;
-      player.y = canvas.height - player.height - 10; // 맨 하단에서 시작
+      player.y = canvas.height - player.height - 120; // 조이스틱 높이를 고려하여 맨 하단에서 시작
 
       startScreen.style.display = "none";
       rankScreen.style.display = "none";
