@@ -284,7 +284,6 @@
       z-index: 5;
     }
 
-    /* 요구사항 1: 조이스틱을 우측 하단으로 이동 (right: 25px) */
     #joystick {
       position: absolute;
       bottom: 50px;
@@ -344,7 +343,6 @@
       
       <button class="btn btn-update" onclick="toggleModal(true)">📢 업데이트 현황 (패치노트)</button>
 
-      <!-- 요구사항 2: 변경된 아이템 확률 표시 -->
       <div class="info-box">
         <h4>🎁 아이템 드롭 확률 정보</h4>
         <div class="info-item"><span class="badge upgrade">2X</span><span><b>탄환 수 증가 (5%)</b>: 발사 탄환 수 +1</span></div>
@@ -378,11 +376,11 @@
       <div class="modal-content">
         <h3>🚀 최근 패치 노트</h3>
         <ul>
-          <li><b>조이스틱 우측 이동</b>: 우측 하단으로 배치하여 조작 편의성을 극대화했습니다.</li>
+          <li><b>기체 이동 방식 원복</b>: 관성을 없애고 즉각적이고 정밀한 바로 조작되도록 복원했습니다.</li>
+          <li><b>몬스터 속도 밸런스</b>: 몬스터 이동 속도를 낮추고 동선을 보다 부드럽게 조정했습니다.</li>
+          <li><b>조이스틱 우측 이동</b>: 우측 하단으로 배치하여 조작 편의성을 제공합니다.</li>
           <li><b>아이템 확률 상향</b>: 모든 아이템 등장 확률이 각각 +2% 상승했습니다.</li>
-          <li><b>부드러운 움직임 적용</b>: 비행기 이동 시 관성이 적용되어 더욱 매끄럽게 조작됩니다.</li>
           <li><b>자동 사격 시스템</b>: FIRE 버튼 없이 기본 탄환이 상시 자동 발사됩니다.</li>
-          <li><b>모바일 스크롤 방지</b>: 터치 조작 시 화면 스크롤 현상을 방지했습니다.</li>
         </ul>
         <div style="text-align: center; margin-top: 15px;">
           <button class="btn" style="padding: 6px 20px; font-size: 0.9rem;" onclick="toggleModal(false)">닫기</button>
@@ -474,16 +472,13 @@
     let bossSpawnCount = 0;  
     let enemyBullets = [];
 
-    // 요구사항 3: 비행기의 부드러운 이동을 위한 속도 벡터 변수(vx, vy) 추가
+    // 요구사항 1: 보간법 제거 - 기존의 즉각 반응 방식으로 복원
     const player = { 
       x: 0, 
       y: 0, 
-      vx: 0,
-      vy: 0,
       width: 28, 
       height: 28, 
-      maxSpeed: 5.5,
-      smoothness: 0.2 // 보간 계수
+      speed: 5
     };
 
     let bullets = [];
@@ -802,8 +797,6 @@
 
       player.x = canvas.width / 2 - player.width / 2;
       player.y = canvas.height - player.height - 60;
-      player.vx = 0;
-      player.vy = 0;
 
       score = 0;
       stage = 1;
@@ -840,20 +833,21 @@
       const x = Math.random() * (canvas.width - width);
       
       let type = "normal";
-      let speed = 1.8;
+      // 요구사항 2: 몬스터 이동속도 약 25~30% 감소 조정
+      let speed = 1.25; 
       let hp = 2;
 
       if (rand < 0.3) {
         type = "fast";
-        speed = 3.8;
+        speed = 2.6;
         hp = 1;
       } else if (rand < 0.55) {
         type = "shooter";
-        speed = 1.2;
+        speed = 0.85;
         hp = 3;
       } else if (rand < 0.75) {
         type = "zigzag";
-        speed = 2.2;
+        speed = 1.5;
         hp = 2;
       }
 
@@ -880,7 +874,7 @@
         y: 40,
         width: 80,
         height: 60,
-        speedX: 2.5,
+        speedX: 1.8, // 보스 이동속도 감소 조정
         hp: calculatedHp,
         maxHp: calculatedHp,
         lastShoot: 0,
@@ -892,12 +886,11 @@
       if (forcedType) {
         items.push({ x, y, width: 22, height: 22, speed: 1.5, type: forcedType });
       } else {
-        // 요구사항 2: 변경된 상향 확률에 따른 비중 계산
         const randWeapon = Math.random();
         let weaponType = "laser";
-        if (randWeapon < 0.222) weaponType = "shotgun"; // 4/18
-        else if (randWeapon < 0.611) weaponType = "saw"; // 7/18
-        else weaponType = "laser";                       // 7/18
+        if (randWeapon < 0.222) weaponType = "shotgun";
+        else if (randWeapon < 0.611) weaponType = "saw";
+        else weaponType = "laser";
 
         items.push({ x, y, width: 22, height: 22, speed: 1.5, type: weaponType });
       }
@@ -925,8 +918,8 @@
               y: originY,
               width: 8,
               height: 8,
-              vx: Math.sin(angle) * 4,
-              vy: Math.cos(angle) * 4
+              vx: Math.sin(angle) * 3.5,
+              vy: Math.cos(angle) * 3.5
             });
           });
         });
@@ -934,7 +927,7 @@
         const dx = (player.x + player.width / 2) - originX;
         const dy = (player.y + player.height / 2) - originY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const speed = 5;
+        const speed = 4.2;
 
         [-10, 10].forEach(offsetX => {
           enemyBullets.push({
@@ -958,7 +951,7 @@
 
       for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 / count) * i;
-        const speed = 4.5;
+        const speed = 4.0;
         enemyBullets.push({
           x: originX - 4,
           y: originY - 4,
@@ -991,25 +984,21 @@
         nextBossKillTarget += 20;
       }
 
-      // 목표 속도 계산
-      let targetVx = 0;
-      let targetVy = 0;
-      if (keys["ArrowLeft"] || keys["KeyA"]) targetVx -= player.maxSpeed;
-      if (keys["ArrowRight"] || keys["KeyD"]) targetVx += player.maxSpeed;
-      if (keys["ArrowUp"] || keys["KeyW"]) targetVy -= player.maxSpeed;
-      if (keys["ArrowDown"] || keys["KeyS"]) targetVy += player.maxSpeed;
+      // 요구사항 1: 기존 직관적인 비행기 이동 처리 복원
+      let moveX = 0;
+      let moveY = 0;
+      if (keys["ArrowLeft"] || keys["KeyA"]) moveX -= 1;
+      if (keys["ArrowRight"] || keys["KeyD"]) moveX += 1;
+      if (keys["ArrowUp"] || keys["KeyW"]) moveY -= 1;
+      if (keys["ArrowDown"] || keys["KeyS"]) moveY += 1;
 
       if (joystickActive) {
-        targetVx = (joystickX / joystickRadius) * player.maxSpeed;
-        targetVy = (joystickY / joystickRadius) * player.maxSpeed;
+        moveX = joystickX / joystickRadius;
+        moveY = joystickY / joystickRadius;
       }
 
-      // 요구사항 3: 부드러운 가감속 보간(Lerp) 적용
-      player.vx += (targetVx - player.vx) * player.smoothness;
-      player.vy += (targetVy - player.vy) * player.smoothness;
-
-      player.x += player.vx;
-      player.y += player.vy;
+      player.x += moveX * player.speed;
+      player.y += moveY * player.speed;
       
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
       
@@ -1099,16 +1088,17 @@
         if (items[i].y > canvas.height) items.splice(i, 1);
       }
 
+      // 요구사항 2: 부드러운 몬스터 이동 연산 적용
       for (let i = monsters.length - 1; i >= 0; i--) {
         const m = monsters[i];
         m.y += m.speed;
 
         if (m.type === "zigzag") {
-          m.x = m.startX + Math.sin(m.y * 0.05) * 40;
+          m.x = m.startX + Math.sin(m.y * 0.03) * 35; // 더욱 부드러운 S자 곡선 이동
         }
 
         const shooterInterval = Math.max(40, 100 - (stage - 1) * 8);
-        const bulletSpeed = 3.5 + (stage - 1) * 0.3;
+        const bulletSpeed = 2.8 + (stage - 1) * 0.2;
 
         if (m.type === "shooter") {
           if (gameTime - m.lastShoot > shooterInterval) {
@@ -1153,7 +1143,6 @@
               killCount++;
               score += m.type === "fast" ? 150 : (m.type === "shooter" ? 200 : 100);
 
-              // 요구사항 2: 탄환 5%, 나머지 무기 총 18% 적용
               const randItem = Math.random();
               if (randItem < 0.05) {
                 spawnItem(m.x, m.y, "upgrade");
