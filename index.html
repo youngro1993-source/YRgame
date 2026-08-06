@@ -319,21 +319,21 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 150px;
-      pointer-events: none;
+      height: 160px;
+      pointer-events: auto;
       z-index: 5;
     }
 
     .arrow-btn {
       position: absolute;
       bottom: 45px;
-      width: 85px;
-      height: 85px;
-      background: rgba(30, 41, 59, 0.55);
+      width: 75px;
+      height: 75px;
+      background: rgba(30, 41, 59, 0.65);
       border: 2px solid rgba(56, 189, 248, 0.6);
       border-radius: 50%;
       color: #38bdf8;
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: bold;
       display: flex;
       justify-content: center;
@@ -343,15 +343,46 @@
       backdrop-filter: blur(4px);
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
       transition: background 0.1s, transform 0.1s;
+      z-index: 7;
     }
 
-    #btnLeft { left: 25px; }
-    #btnRight { right: 25px; }
+    #btnLeft { left: 20px; }
+    #btnRight { right: 20px; }
 
     .arrow-btn:active, .arrow-btn.pressed {
       background: rgba(56, 189, 248, 0.4);
       color: #fff;
       transform: scale(0.92);
+    }
+
+    /* 조이스틱 UI 스타일 추가 */
+    #joystickArea {
+      position: absolute;
+      bottom: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 90px;
+      background: rgba(30, 41, 59, 0.45);
+      border: 2px dashed rgba(56, 189, 248, 0.5);
+      border-radius: 50%;
+      touch-action: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 7;
+    }
+
+    #joystickKnob {
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, #38bdf8 0%, #1d4ed8 100%);
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+      position: absolute;
+      pointer-events: none;
+      transition: transform 0.05s linear;
     }
 
     #weaponInfoBar {
@@ -436,19 +467,19 @@
         
         <div class="history-scroll-area">
           <div class="version-block">
-            <div class="version-title">v1.8.0 (최신 - 이펙트 & 밸런스 패치)</div>
+            <div class="version-title">v1.9.0 (최신 - 조이스틱 컨트롤 탑재)</div>
             <ul>
-              <li><b>타격 파티클 이펙트 추가</b>: 적 파괴 및 보스 타격 시 시각적 폭발 연출 추가.</li>
-              <li><b>사운드 안정화</b>: 터치 시 BGM 중복 중첩 현상 수정.</li>
-              <li><b>화면 비율 개선</b>: 다양한 모바일 디바이스 해상도 대응 보정.</li>
+              <li><b>조이스틱 컨트롤 추가</b>: 하단 중앙 스와이프 조이스틱 컨트롤 패널 구현.</li>
+              <li><b>터치 반응성 개선</b>: 버클/화살표 및 중앙 패드 인터페이스 세분화.</li>
             </ul>
           </div>
 
           <div class="version-block">
-            <div class="version-title">v1.7.0</div>
+            <div class="version-title">v1.8.0</div>
             <ul>
-              <li><b>YOON 행성 배경 스토리</b>: 오프닝 스토리 연출 추가.</li>
-              <li><b>BGM 사운드 추가</b>: 레트로 오디오 사운드트랙 탑재.</li>
+              <li><b>타격 파티클 이펙트 추가</b>: 적 파괴 및 보스 타격 시 시각적 폭발 연출 추가.</li>
+              <li><b>사운드 안정화</b>: 터치 시 BGM 중복 중첩 현상 수정.</li>
+              <li><b>화면 비율 개선</b>: 다양한 모바일 디바이스 해상도 대응 보정.</li>
             </ul>
           </div>
         </div>
@@ -485,6 +516,12 @@
     <!-- 컨트롤 영역 -->
     <div id="controlArea" class="hidden">
       <div id="btnLeft" class="arrow-btn">◀</div>
+      
+      <!-- 조이스틱 영역 -->
+      <div id="joystickArea">
+        <div id="joystickKnob"></div>
+      </div>
+
       <div id="btnRight" class="arrow-btn">▶</div>
       <div id="weaponInfoBar">무기: 기본 탄환 - 연속 직진 사격</div>
     </div>
@@ -662,7 +699,7 @@
     let bossBaseHp = 45;    
     let bossSpawnCount = 0;  
     let enemyBullets = [];
-    let particles = []; // 파티클 이펙트 배열
+    let particles = [];
 
     const player = { 
       x: 0, 
@@ -682,6 +719,7 @@
 
     let touchLeftPressed = false;
     let touchRightPressed = false;
+    let joystickAxisX = 0; // -1 (왼쪽) ~ 1 (오른쪽) 조이스틱 방향값
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -720,6 +758,8 @@
     // --- 컨트롤 터치/키보드 이벤트 ---
     const btnLeft = document.getElementById("btnLeft");
     const btnRight = document.getElementById("btnRight");
+    const joystickArea = document.getElementById("joystickArea");
+    const joystickKnob = document.getElementById("joystickKnob");
 
     btnLeft.addEventListener("touchstart", (e) => {
       e.preventDefault();
@@ -749,6 +789,78 @@
     btnLeft.addEventListener("mouseup", () => { touchLeftPressed = false; btnLeft.classList.remove("pressed"); });
     btnRight.addEventListener("mousedown", () => { touchRightPressed = true; btnRight.classList.add("pressed"); });
     btnRight.addEventListener("mouseup", () => { touchRightPressed = false; btnRight.classList.remove("pressed"); });
+
+    // --- 조이스틱 이벤트 로직 ---
+    let joystickTouchId = null;
+
+    function handleJoystickMove(clientX) {
+      const rect = joystickArea.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const maxDistance = rect.width / 2;
+
+      let deltaX = clientX - centerX;
+      deltaX = Math.max(-maxDistance, Math.min(maxDistance, deltaX));
+
+      joystickKnob.style.transform = `translateX(${deltaX}px)`;
+      joystickAxisX = deltaX / maxDistance; // -1.0 ~ 1.0 값 설정
+    }
+
+    function resetJoystick() {
+      joystickKnob.style.transform = `translateX(0px)`;
+      joystickAxisX = 0;
+      joystickTouchId = null;
+    }
+
+    joystickArea.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      initAudio();
+      if (joystickTouchId === null && e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
+        joystickTouchId = touch.identifier;
+        handleJoystickMove(touch.clientX);
+      }
+    });
+
+    joystickArea.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === joystickTouchId) {
+          handleJoystickMove(e.touches[i].clientX);
+          break;
+        }
+      }
+    });
+
+    joystickArea.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === joystickTouchId) {
+          resetJoystick();
+          break;
+        }
+      }
+    });
+
+    joystickArea.addEventListener("touchcancel", resetJoystick);
+
+    // 마우스 호환 처리 (조이스틱)
+    let isMouseDownJoystick = false;
+    joystickArea.addEventListener("mousedown", (e) => {
+      initAudio();
+      isMouseDownJoystick = true;
+      handleJoystickMove(e.clientX);
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (isMouseDownJoystick) {
+        handleJoystickMove(e.clientX);
+      }
+    });
+    window.addEventListener("mouseup", () => {
+      if (isMouseDownJoystick) {
+        isMouseDownJoystick = false;
+        resetJoystick();
+      }
+    });
 
     document.addEventListener("keydown", (e) => {
       initAudio();
@@ -999,6 +1111,8 @@
       weaponInfoBar.textContent = weaponDescriptions[currentWeapon];
       isGameOver = false;
 
+      resetJoystick();
+
       boss = null;
       bullets = [];
       monsters = [];
@@ -1174,9 +1288,14 @@
         nextBossKillTarget += 20;
       }
 
+      // 키보드, 버튼, 조이스틱 입력 결합
       let moveX = 0;
       if (keys["ArrowLeft"] || keys["KeyA"] || touchLeftPressed) moveX -= 1;
       if (keys["ArrowRight"] || keys["KeyD"] || touchRightPressed) moveX += 1;
+      
+      if (joystickAxisX !== 0) {
+        moveX += joystickAxisX;
+      }
 
       player.x += moveX * player.speed;
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
