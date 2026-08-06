@@ -191,7 +191,6 @@
       padding: 20px;
     }
 
-    /* 요구사항 2: 업데이트 스크롤 영역 및 디자인 확장 */
     .modal-content {
       background: #1e293b;
       border: 2px solid #38bdf8;
@@ -222,7 +221,6 @@
       touch-action: pan-y;
     }
 
-    /* 커스텀 스크롤바 */
     .history-scroll-area::-webkit-scrollbar {
       width: 6px;
     }
@@ -324,7 +322,6 @@
       z-index: 5;
     }
 
-    /* 요구사항 1: 조이스틱 크기 확장에 따른 스타일 설정 (130px) */
     #joystick {
       position: absolute;
       bottom: 65px;
@@ -417,52 +414,43 @@
       <div class="credits">[만든이 : YYR]</div>
     </div>
 
-    <!-- 요구사항 2: 스크롤이 가능한 상세 업데이트 히스토리 모달 -->
+    <!-- 업데이트 히스토리 모달 -->
     <div id="updateModal" class="hidden">
       <div class="modal-content">
         <h3>📜 업데이트 히스토리</h3>
         
         <div class="history-scroll-area">
           <div class="version-block">
-            <div class="version-title">v1.4.0 (최신 업데이트)</div>
+            <div class="version-title">v1.5.0 (최신 - 난이도 & SFX 패치)</div>
             <ul>
-              <li><b>조이스틱 130px 크기 확장</b>: 컨트롤 패드를 대폭 확장하여 조작 성공률을 증대했습니다.</li>
-              <li><b>업데이트 히스토리 스크롤 추가</b>: 지난 모든 버전의 패치 상세 내역을 탐색할 수 있습니다.</li>
-              <li><b>슈터 몬스터 탄환 하향</b>: 2연발 사격에서 직진 단발 사격으로 조정되었습니다.</li>
+              <li><b>전체 난이도 하향</b>: 플레이어 사격 속도 증가(120ms→90ms), 적 체력 및 등장 빈도 감소.</li>
+              <li><b>Web Audio 사운드 시스템 추가</b>: 레트로 BGM 및 사격, 폭발, 아이템 SFX 추가.</li>
+              <li><b>보스 밸런스 조절</b>: 탄막 속도 및 발사 주기가 완화되었습니다.</li>
+            </ul>
+          </div>
+
+          <div class="version-block">
+            <div class="version-title">v1.4.0</div>
+            <ul>
+              <li><b>조이스틱 130px 크기 확장</b>: 조작 패드를 확장하여 가동성을 향상했습니다.</li>
+              <li><b>업데이트 히스토리 스크롤</b>: 패치노트 상세 모달 기능을 제공합니다.</li>
             </ul>
           </div>
 
           <div class="version-block">
             <div class="version-title">v1.3.0</div>
             <ul>
-              <li><b>터치 반응성 투명화</b>: 조이스틱 작동 시 반투명화(25%)되어 게임 가시성을 확보했습니다.</li>
-              <li><b>기체 컨트롤 복원</b>: 관성을 제거하고 밀림 없는 즉각적 반응을 재적용했습니다.</li>
-              <li><b>몬스터 속도 밸런스</b>: 전체 몬스터의 이동속도를 낮추고 동선을 부드럽게 개선했습니다.</li>
+              <li><b>조이스틱 투명화</b>: 터치 중 조이스틱 반투명(25%) 처리로 시야를 확보했습니다.</li>
+              <li><b>몬스터 동선 최적화</b>: 몬스터 속도 감소 및 매끄러운 움직임을 재설정했습니다.</li>
             </ul>
           </div>
 
           <div class="version-block">
             <div class="version-title">v1.2.0</div>
             <ul>
-              <li><b>조이스틱 우측 배치</b>: 오른손 터치 편의성을 고려해 조이스틱을 우측으로 이동했습니다.</li>
-              <li><b>아이템 확률 상향</b>: 모든 드롭 아이템의 기본 등장 확률을 각각 +2%p 상승시켰습니다.</li>
-              <li><b>자동 사격 시스템</b>: FIRE 버튼 클릭 없이 상시 사격이 유지되는 옵션을 기본 채택했습니다.</li>
-            </ul>
-          </div>
-
-          <div class="version-block">
-            <div class="version-title">v1.1.0</div>
-            <ul>
-              <li><b>모바일 스크롤 바운스 방지</b>: 터치 조작 시 화면 전체가 상하로 튀거나 흔들리는 버그를 차단했습니다.</li>
-              <li><b>Kills 횟수 HUD 표기</b>: 처치한 적의 수를 상단 UI에 실시간으로 표시하도록 수정했습니다.</li>
-              <li><b>하단 경계 제한</b>: 비행기가 조이스틱 터치패널 뒤로 숨는 현상을 방지하도록 boundary를 지정했습니다.</li>
-            </ul>
-          </div>
-
-          <div class="version-block">
-            <div class="version-title">v1.0.0 (정식 출시)</div>
-            <ul>
-              <li><b>은하 수호대 정식 오픈</b>: 4종 무기 시스템, 보스 웨이브, 킬 카운트 랭킹 보드가 구축되었습니다.</li>
+              <li><b>조이스틱 우측 배치</b>: 오른손 조작 편의성을 극대화했습니다.</li>
+              <li><b>아이템 확률 상승</b>: 아이템 드롭률이 각 +2%p 상승했습니다.</li>
+              <li><b>상시 자동 사격</b>: FIRE 버튼 삭제 후 자동사격 시스템을 채택했습니다.</li>
             </ul>
           </div>
         </div>
@@ -511,6 +499,127 @@
       e.preventDefault();
     }, { passive: false });
 
+    // --- Web Audio API 기반 사운드 엔진 ---
+    let audioCtx = null;
+    let bgmInterval = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // 효과음 생성기
+    function playSound(type) {
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'normal') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'laser') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.12);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'shotgun') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.1);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'saw') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.linearRampToValueAtTime(500, now + 0.09);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.09);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      } else if (type === 'explosion') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'item') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.06);
+        osc.frequency.setValueAtTime(783.99, now + 0.12);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'gameover') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.linearRampToValueAtTime(80, now + 0.6);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      }
+    }
+
+    // 배경음악(BGM) 엔진
+    function startBGM() {
+      stopBGM();
+      if (!audioCtx) return;
+
+      const notes = [110, 110, 146.83, 130.81, 110, 110, 164.81, 146.83];
+      let step = 0;
+
+      bgmInterval = setInterval(() => {
+        if (!audioCtx || isGameOver) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(notes[step % notes.length], now);
+
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.18);
+        step++;
+      }, 220);
+    }
+
+    function stopBGM() {
+      if (bgmInterval) {
+        clearInterval(bgmInterval);
+        bgmInterval = null;
+      }
+    }
+
+    // --- 게임 기본 캔버스 및 변수 ---
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -553,7 +662,7 @@
     };
 
     let boss = null;
-    let bossBaseHp = 60;     
+    let bossBaseHp = 45; // 보스 체력 완화    
     let bossSpawnCount = 0;  
     let enemyBullets = [];
 
@@ -562,7 +671,7 @@
       y: 0, 
       width: 28, 
       height: 28, 
-      speed: 5
+      speed: 5.5 // 기체 속도 미세 증가로 회피력 상승
     };
 
     let bullets = [];
@@ -571,7 +680,7 @@
     let keys = {};
 
     let lastShootTime = 0;
-    const shootInterval = 120;
+    const shootInterval = 90; // 요구사항 1: 플레이어 연사 속도 대폭 증가 (120ms -> 90ms)
 
     function toggleModal(show) {
       if (show) {
@@ -589,11 +698,11 @@
     let joystickX = 0;
     let joystickY = 0;
     let joystickTouchId = null;
-    // 요구사항 1: 커진 반경 설정 (130px 크기에 맞춰 반경 65 적용)
     const joystickRadius = 65;
 
     joystickContainer.addEventListener("touchstart", (e) => {
       e.preventDefault();
+      initAudio();
       if (e.touches.length > 0) {
         joystickActive = true;
         joystickContainer.classList.add("active");
@@ -652,6 +761,7 @@
     }
 
     document.addEventListener("keydown", (e) => {
+      initAudio();
       keys[e.code] = true;
     });
     document.addEventListener("keyup", (e) => {
@@ -659,6 +769,8 @@
     });
 
     function shoot() {
+      playSound(currentWeapon); // 무기별 SFX 재생
+
       const level = Math.min(bulletCount, 6);
       const bulletOffsets = {
         1: [0],
@@ -678,24 +790,24 @@
         if (currentWeapon === "laser") {
           bullets.push({ 
             x: startX - 2, y: startY, width: 4, height: 30, 
-            speed: 15, type: "laser", vx: 0, vy: -15, pierce: true 
+            speed: 16, type: "laser", vx: 0, vy: -16, pierce: true 
           });
         } else if (currentWeapon === "saw") {
           bullets.push({ 
             x: startX - 10, y: startY, width: 20, height: 20, 
-            speed: 6, type: "saw", vx: 0, vy: -6, angle: 0 
+            speed: 7, type: "saw", vx: 0, vy: -7, angle: 0 
           });
         } else if (currentWeapon === "shotgun") {
           [-0.15, 0.15].forEach(ang => {
             bullets.push({ 
               x: startX - 2.5, y: startY, width: 5, height: 5, 
-              type: "shotgun", vx: Math.sin(ang) * 7, vy: -Math.cos(ang) * 7 
+              type: "shotgun", vx: Math.sin(ang) * 7.5, vy: -Math.cos(ang) * 7.5 
             });
           });
         } else {
           bullets.push({ 
             x: startX - 3, y: startY, width: 6, height: 14, 
-            type: "normal", vx: 0, vy: -8 
+            type: "normal", vx: 0, vy: -9 
           });
         }
       });
@@ -875,6 +987,9 @@
     }
 
     function startGame() {
+      initAudio();
+      startBGM(); // 배경음악 재생 시작
+
       playerNickname = nicknameInput.value.trim() || "Pilot";
       startScreen.classList.add("hidden");
       rankScreen.classList.add("hidden");
@@ -907,6 +1022,7 @@
     }
 
     function goToMainScreen() {
+      stopBGM();
       rankScreen.classList.add("hidden");
       controlArea.classList.add("hidden");
       startScreen.classList.remove("hidden");
@@ -920,21 +1036,21 @@
       const x = Math.random() * (canvas.width - width);
       
       let type = "normal";
-      let speed = 1.25; 
-      let hp = 2;
+      let speed = 1.1; 
+      let hp = 1; // 요구사항 1: 일반 몬스터 체력 하향 (2 -> 1)
 
       if (rand < 0.3) {
         type = "fast";
-        speed = 2.6;
+        speed = 2.2;
         hp = 1;
       } else if (rand < 0.55) {
         type = "shooter";
-        speed = 0.85;
-        hp = 3;
+        speed = 0.75;
+        hp = 2; // 슈터 몬스터 체력 하향 (3 -> 2)
       } else if (rand < 0.75) {
         type = "zigzag";
-        speed = 1.5;
-        hp = 2;
+        speed = 1.3;
+        hp = 1;
       }
 
       monsters.push({
@@ -952,14 +1068,14 @@
 
     function spawnBoss() {
       bossSpawnCount++;
-      const calculatedHp = Math.floor(bossBaseHp * Math.pow(1.5, bossSpawnCount - 1));
+      const calculatedHp = Math.floor(bossBaseHp * Math.pow(1.3, bossSpawnCount - 1));
       
       boss = {
         x: canvas.width / 2 - 40,
         y: 40,
         width: 80,
         height: 60,
-        speedX: 1.8,
+        speedX: 1.5,
         hp: calculatedHp,
         maxHp: calculatedHp,
         lastShoot: 0,
@@ -995,34 +1111,30 @@
       const originY = boss.y + boss.height;
 
       if (boss.patternTimer % 2 === 0) {
-        const angles = [-0.4, -0.2, 0, 0.2, 0.4];
+        const angles = [-0.3, 0, 0.3]; // 보스 탄막 각도 완화
         angles.forEach(angle => {
-          [-8, 8].forEach(offsetX => {
-            enemyBullets.push({
-              x: originX + offsetX - 4,
-              y: originY,
-              width: 8,
-              height: 8,
-              vx: Math.sin(angle) * 3.5,
-              vy: Math.cos(angle) * 3.5
-            });
+          enemyBullets.push({
+            x: originX - 4,
+            y: originY,
+            width: 8,
+            height: 8,
+            vx: Math.sin(angle) * 3,
+            vy: Math.cos(angle) * 3
           });
         });
       } else {
         const dx = (player.x + player.width / 2) - originX;
         const dy = (player.y + player.height / 2) - originY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const speed = 4.2;
+        const speed = 3.5;
 
-        [-10, 10].forEach(offsetX => {
-          enemyBullets.push({
-            x: originX + offsetX - 5,
-            y: originY,
-            width: 10,
-            height: 10,
-            vx: (dx / dist) * speed,
-            vy: (dy / dist) * speed
-          });
+        enemyBullets.push({
+          x: originX - 5,
+          y: originY,
+          width: 10,
+          height: 10,
+          vx: (dx / dist) * speed,
+          vy: (dy / dist) * speed
         });
       }
 
@@ -1030,13 +1142,14 @@
     }
 
     function explodeBoss(boss) {
+      playSound('explosion');
       const originX = boss.x + boss.width / 2;
       const originY = boss.y + boss.height / 2;
-      const count = 16 + (stage - 1) * 4; 
+      const count = 12 + (stage - 1) * 2; 
 
       for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 / count) * i;
-        const speed = 4.0;
+        const speed = 3.2;
         enemyBullets.push({
           x: originX - 4,
           y: originY - 4,
@@ -1059,7 +1172,8 @@
         lastShootTime = now;
       }
 
-      const currentSpawnInterval = Math.max(8, Math.floor(35 / Math.pow(1.5, stage - 1)));
+      // 요구사항 1: 몬스터 스폰 간격 완화 (45프레임 기준)
+      const currentSpawnInterval = Math.max(12, Math.floor(45 / Math.pow(1.3, stage - 1)));
       if (gameTime % currentSpawnInterval === 0) {
         spawnMonster();
       }
@@ -1109,7 +1223,7 @@
           boss.speedX *= -1;
         }
 
-        const bossShootInterval = Math.max(30, 70 - (stage - 1) * 5);
+        const bossShootInterval = Math.max(45, 85 - (stage - 1) * 4);
         if (gameTime - boss.lastShoot > bossShootInterval) {
           fireBossPattern(boss);
           boss.lastShoot = gameTime;
@@ -1156,6 +1270,7 @@
         items[i].y += items[i].speed;
 
         if (checkCollision(player, items[i])) {
+          playSound('item'); // 아이템 획득 SFX
           const itemType = items[i].type;
           
           if (itemType === "upgrade") {
@@ -1180,8 +1295,8 @@
           m.x = m.startX + Math.sin(m.y * 0.03) * 35;
         }
 
-        const shooterInterval = Math.max(40, 100 - (stage - 1) * 8);
-        const bulletSpeed = 2.8 + (stage - 1) * 0.2;
+        const shooterInterval = Math.max(50, 110 - (stage - 1) * 6);
+        const bulletSpeed = 2.4 + (stage - 1) * 0.2;
 
         if (m.type === "shooter") {
           if (gameTime - m.lastShoot > shooterInterval) {
@@ -1208,6 +1323,7 @@
             m.hp--;
 
             if (m.hp <= 0) {
+              playSound('explosion'); // 폭발 SFX
               killCount++;
               score += m.type === "fast" ? 150 : (m.type === "shooter" ? 200 : 100);
 
@@ -1278,6 +1394,8 @@
 
     function gameOver() {
       isGameOver = true;
+      stopBGM();
+      playSound('gameover'); // 게임오버 사운드
       cancelAnimationFrame(gameAnimationId);
 
       controlArea.classList.add("hidden");
