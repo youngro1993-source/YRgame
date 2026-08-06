@@ -279,14 +279,15 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 170px;
+      height: 180px;
       pointer-events: none;
       z-index: 5;
     }
 
+    /* 요구사항 2: 조이스틱 위치 상향 조정 (bottom: 75px) */
     #joystick {
       position: absolute;
-      bottom: 50px;
+      bottom: 75px;
       right: 25px;
       width: 100px;
       height: 100px;
@@ -296,6 +297,12 @@
       pointer-events: auto;
       touch-action: none;
       backdrop-filter: blur(2px);
+      transition: opacity 0.15s ease;
+    }
+
+    /* 요구사항 1: 조작 시 투명도 증가 클래스 */
+    #joystick.active {
+      opacity: 0.25;
     }
 
     #joystickStick {
@@ -376,11 +383,11 @@
       <div class="modal-content">
         <h3>🚀 최근 패치 노트</h3>
         <ul>
-          <li><b>기체 이동 방식 원복</b>: 관성을 없애고 즉각적이고 정밀한 바로 조작되도록 복원했습니다.</li>
-          <li><b>몬스터 속도 밸런스</b>: 몬스터 이동 속도를 낮추고 동선을 보다 부드럽게 조정했습니다.</li>
-          <li><b>조이스틱 우측 이동</b>: 우측 하단으로 배치하여 조작 편의성을 제공합니다.</li>
-          <li><b>아이템 확률 상향</b>: 모든 아이템 등장 확률이 각각 +2% 상승했습니다.</li>
-          <li><b>자동 사격 시스템</b>: FIRE 버튼 없이 기본 탄환이 상시 자동 발사됩니다.</li>
+          <li><b>조이스틱 투명도 개선</b>: 작동 시 조이스틱이 더 투명해져 가시성을 높였습니다.</li>
+          <li><b>조이스틱 위치 상향</b>: 조작 위치를 위로 올려 한 손 조작을 더욱 용이하게 했습니다.</li>
+          <li><b>몬스터 공격 하향</b>: 슈터 몬스터가 1발씩 사격하도록 하향되었습니다.</li>
+          <li><b>기체 이동 원복</b>: 관성 없이 즉각적인 컨트롤 방식을 적용했습니다.</li>
+          <li><b>자동 사격 지원</b>: 기본 탄환이 항상 자동 발사됩니다.</li>
         </ul>
         <div style="text-align: center; margin-top: 15px;">
           <button class="btn" style="padding: 6px 20px; font-size: 0.9rem;" onclick="toggleModal(false)">닫기</button>
@@ -472,7 +479,6 @@
     let bossSpawnCount = 0;  
     let enemyBullets = [];
 
-    // 요구사항 1: 보간법 제거 - 기존의 즉각 반응 방식으로 복원
     const player = { 
       x: 0, 
       y: 0, 
@@ -507,10 +513,12 @@
     let joystickTouchId = null;
     const joystickRadius = 50;
 
+    // 요구사항 1: 조이스틱 작동 시 투명도 높이기 (active 클래스 부여)
     joystickContainer.addEventListener("touchstart", (e) => {
       e.preventDefault();
       if (e.touches.length > 0) {
         joystickActive = true;
+        joystickContainer.classList.add("active");
         joystickTouchId = e.touches[0].identifier;
         updateJoystick(e.touches[0]);
       }
@@ -530,6 +538,7 @@
       for (let touch of e.changedTouches) {
         if (touch.identifier === joystickTouchId) {
           joystickActive = false;
+          joystickContainer.classList.remove("active");
           joystickX = 0;
           joystickY = 0;
           joystickTouchId = null;
@@ -796,7 +805,7 @@
       resizeCanvas();
 
       player.x = canvas.width / 2 - player.width / 2;
-      player.y = canvas.height - player.height - 60;
+      player.y = canvas.height - player.height - 80;
 
       score = 0;
       stage = 1;
@@ -833,7 +842,6 @@
       const x = Math.random() * (canvas.width - width);
       
       let type = "normal";
-      // 요구사항 2: 몬스터 이동속도 약 25~30% 감소 조정
       let speed = 1.25; 
       let hp = 2;
 
@@ -860,8 +868,7 @@
         speed: speed,
         type: type,
         hp: hp,
-        lastShoot: 0,
-        pendingSecondShot: 0
+        lastShoot: 0
       });
     }
 
@@ -874,7 +881,7 @@
         y: 40,
         width: 80,
         height: 60,
-        speedX: 1.8, // 보스 이동속도 감소 조정
+        speedX: 1.8,
         hp: calculatedHp,
         maxHp: calculatedHp,
         lastShoot: 0,
@@ -984,7 +991,6 @@
         nextBossKillTarget += 20;
       }
 
-      // 요구사항 1: 기존 직관적인 비행기 이동 처리 복원
       let moveX = 0;
       let moveY = 0;
       if (keys["ArrowLeft"] || keys["KeyA"]) moveX -= 1;
@@ -1002,7 +1008,7 @@
       
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
       
-      const bottomBoundary = canvas.height - player.height - 60;
+      const bottomBoundary = canvas.height - player.height - 80;
       player.y = Math.max(0, Math.min(bottomBoundary, player.y));
 
       for (let i = bullets.length - 1; i >= 0; i--) {
@@ -1088,18 +1094,18 @@
         if (items[i].y > canvas.height) items.splice(i, 1);
       }
 
-      // 요구사항 2: 부드러운 몬스터 이동 연산 적용
       for (let i = monsters.length - 1; i >= 0; i--) {
         const m = monsters[i];
         m.y += m.speed;
 
         if (m.type === "zigzag") {
-          m.x = m.startX + Math.sin(m.y * 0.03) * 35; // 더욱 부드러운 S자 곡선 이동
+          m.x = m.startX + Math.sin(m.y * 0.03) * 35;
         }
 
         const shooterInterval = Math.max(40, 100 - (stage - 1) * 8);
         const bulletSpeed = 2.8 + (stage - 1) * 0.2;
 
+        // 요구사항 3: 슈터 몬스터 하향 - 2연발 삭제 후 단발(총알 1개)만 발사
         if (m.type === "shooter") {
           if (gameTime - m.lastShoot > shooterInterval) {
             enemyBullets.push({
@@ -1111,21 +1117,6 @@
               vy: bulletSpeed
             });
             m.lastShoot = gameTime;
-            m.pendingSecondShot = 12;
-          }
-
-          if (m.pendingSecondShot > 0) {
-            m.pendingSecondShot--;
-            if (m.pendingSecondShot === 0) {
-              enemyBullets.push({
-                x: m.x + m.width / 2 - 3,
-                y: m.y + m.height,
-                width: 6,
-                height: 10,
-                vx: 0,
-                vy: bulletSpeed
-              });
-            }
           }
         }
 
