@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>은하 수호대: 은하계를 지켜라</title>
   <style>
     * {
@@ -13,10 +13,13 @@
       -webkit-user-select: none;
     }
 
+    /* 요구사항 2: 모바일 브라우저 스크롤 및 터치 동작 방지 */
     body, html {
       width: 100%;
       height: 100%;
       overflow: hidden;
+      position: fixed;
+      touch-action: none;
       background-color: #050515;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
@@ -29,12 +32,14 @@
       max-width: 500px;
       margin: 0 auto;
       background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+      touch-action: none;
     }
 
     canvas {
       display: block;
       width: 100%;
       height: 100%;
+      touch-action: none;
     }
 
     /* 화면 오버레이 공통 디자인 */
@@ -54,6 +59,7 @@
       padding: 20px 15px;
       text-align: center;
       overflow-y: auto;
+      touch-action: pan-y; /* 오버레이 메뉴 내에서만 세로 스크롤 허용 */
     }
 
     .hidden {
@@ -207,46 +213,50 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 150px;
+      height: 170px;
       pointer-events: none;
       z-index: 5;
     }
 
+    /* 요구사항 1 & 3: 조이스틱 위치 상향, 크기 키움(100px), 투명도 50% */
     #joystick {
       position: absolute;
-      bottom: 35px;
+      bottom: 50px;
       left: 20px;
-      width: 80px;
-      height: 80px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.5);
       border-radius: 50%;
       pointer-events: auto;
       touch-action: none;
+      backdrop-filter: blur(2px);
     }
 
     #joystickStick {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 36px;
-      height: 36px;
-      background: rgba(59, 130, 246, 0.8);
+      width: 44px;
+      height: 44px;
+      background: rgba(59, 130, 246, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
     }
 
+    /* 요구사항 1: FIRE 버튼 위치 상향, 투명도 50% */
     #shootBtn {
       position: absolute;
-      bottom: 35px;
+      bottom: 50px;
       right: 20px;
-      width: 75px;
-      height: 75px;
-      background: rgba(239, 68, 68, 0.8);
+      width: 80px;
+      height: 80px;
+      background: rgba(239, 68, 68, 0.5);
       border: 2px solid rgba(255, 255, 255, 0.5);
       border-radius: 50%;
-      color: white;
+      color: rgba(255, 255, 255, 0.9);
       font-weight: bold;
       font-size: 1.1rem;
       display: flex;
@@ -254,11 +264,12 @@
       align-items: center;
       pointer-events: auto;
       touch-action: none;
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+      backdrop-filter: blur(2px);
     }
 
     #shootBtn:active {
-      background: rgba(220, 38, 38, 1);
+      background: rgba(220, 38, 38, 0.75);
     }
 
     #weaponInfoBar {
@@ -353,6 +364,12 @@
   </div>
 
   <script>
+    // 요구사항 2: 브라우저 기본 드래그 및 터치 스크롤 차단
+    document.addEventListener("touchmove", (e) => {
+      if (e.target.closest('.screen')) return; // 메인/결과 화면 내부 스크롤만 허용
+      e.preventDefault();
+    }, { passive: false });
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -415,7 +432,7 @@
     let lastShootTime = 0;
     const shootInterval = 120; 
 
-    // --- 터치 조이스틱 ---
+    // --- 터치 조이스틱 (요구사항 3: 커진 반경 적용) ---
     const joystickContainer = document.getElementById("joystick");
     const joystickStick = document.getElementById("joystickStick");
     const shootBtn = document.getElementById("shootBtn");
@@ -424,7 +441,7 @@
     let joystickX = 0;
     let joystickY = 0;
     let joystickTouchId = null;
-    const joystickRadius = 40;
+    const joystickRadius = 50; // 커진 크기에 맞게 조이스틱 가동 반경 조정
 
     joystickContainer.addEventListener("touchstart", (e) => {
       e.preventDefault();
@@ -478,8 +495,8 @@
     }
 
     function updateJoystickVisuals() {
-      const offsetX = (joystickX / joystickRadius) * 25;
-      const offsetY = (joystickY / joystickRadius) * 25;
+      const offsetX = (joystickX / joystickRadius) * 30;
+      const offsetY = (joystickY / joystickRadius) * 30;
       joystickStick.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
     }
 
@@ -723,8 +740,7 @@
       resizeCanvas();
 
       player.x = canvas.width / 2 - player.width / 2;
-      // 하단 한계선 영역 상단 위치에 초기 스폰
-      player.y = canvas.height - player.height - 50;
+      player.y = canvas.height - player.height - 60;
 
       score = 0;
       stage = 1;
@@ -926,11 +942,10 @@
       player.x += moveX * player.speed;
       player.y += moveY * player.speed;
       
-      // 좌우 이동 경계 제한
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
       
-      // 상하 이동 경계 제한 (요구사항: 모바일 조이스틱 패널 영역 및 화면 최하단으로 들어가지 못하도록 50px 한계 지정)
-      const bottomBoundary = canvas.height - player.height - 50;
+      // 하단 조이스틱 및 패널 영역 침범 방지 경계 (60px 세이프존)
+      const bottomBoundary = canvas.height - player.height - 60;
       player.y = Math.max(0, Math.min(bottomBoundary, player.y));
 
       for (let i = bullets.length - 1; i >= 0; i--) {
