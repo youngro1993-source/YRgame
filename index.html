@@ -314,12 +314,16 @@
 
     th { color: #f87171; }
 
+    /* 컨트롤 영역 전체 시각화 패널 */
     #controlArea {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 160px;
+      background: rgba(15, 23, 42, 0.92);
+      border-top: 2px solid rgba(56, 189, 248, 0.5);
+      backdrop-filter: blur(8px);
       pointer-events: auto;
       z-index: 5;
     }
@@ -329,7 +333,7 @@
       bottom: 45px;
       width: 75px;
       height: 75px;
-      background: rgba(30, 41, 59, 0.65);
+      background: rgba(30, 41, 59, 0.8);
       border: 2px solid rgba(56, 189, 248, 0.6);
       border-radius: 50%;
       color: #38bdf8;
@@ -340,7 +344,6 @@
       align-items: center;
       pointer-events: auto;
       touch-action: none;
-      backdrop-filter: blur(4px);
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
       transition: background 0.1s, transform 0.1s;
       z-index: 7;
@@ -355,7 +358,7 @@
       transform: scale(0.92);
     }
 
-    /* 조이스틱 UI 스타일 추가 */
+    /* 상하좌우 지원 조이스틱 UI */
     #joystickArea {
       position: absolute;
       bottom: 35px;
@@ -363,8 +366,8 @@
       transform: translateX(-50%);
       width: 90px;
       height: 90px;
-      background: rgba(30, 41, 59, 0.45);
-      border: 2px dashed rgba(56, 189, 248, 0.5);
+      background: rgba(30, 41, 59, 0.7);
+      border: 2px dashed rgba(56, 189, 248, 0.6);
       border-radius: 50%;
       touch-action: none;
       display: flex;
@@ -391,7 +394,7 @@
       left: 0;
       width: 100%;
       height: 28px;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(2, 6, 23, 0.95);
       border-top: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
       justify-content: center;
@@ -400,7 +403,6 @@
       color: #38bdf8;
       font-weight: 600;
       letter-spacing: 0.5px;
-      backdrop-filter: blur(4px);
       z-index: 6;
       pointer-events: none;
     }
@@ -467,10 +469,10 @@
         
         <div class="history-scroll-area">
           <div class="version-block">
-            <div class="version-title">v1.9.0 (최신 - 조이스틱 컨트롤 탑재)</div>
+            <div class="version-title">v2.0.0 (최신 - 상하좌우 컨트롤 & 침범 방지 패널)</div>
             <ul>
-              <li><b>조이스틱 컨트롤 추가</b>: 하단 중앙 스와이프 조이스틱 컨트롤 패널 구현.</li>
-              <li><b>터치 반응성 개선</b>: 버클/화살표 및 중앙 패드 인터페이스 세분화.</li>
+              <li><b>360도 전방향 조이스틱</b>: 상하좌우 완전 전방향 비행기 조종 지원.</li>
+              <li><b>컨트롤 안전구역 독립 UI</b>: 하단 조작계 영역으로 비행기가 들어오지 못하도록 스크린 경계 차단.</li>
             </ul>
           </div>
 
@@ -479,7 +481,6 @@
             <ul>
               <li><b>타격 파티클 이펙트 추가</b>: 적 파괴 및 보스 타격 시 시각적 폭발 연출 추가.</li>
               <li><b>사운드 안정화</b>: 터치 시 BGM 중복 중첩 현상 수정.</li>
-              <li><b>화면 비율 개선</b>: 다양한 모바일 디바이스 해상도 대응 보정.</li>
             </ul>
           </div>
         </div>
@@ -513,11 +514,11 @@
       <button class="btn" style="background: linear-gradient(135deg, #475569, #334155);" onclick="goToMainScreen()">메인 화면으로</button>
     </div>
 
-    <!-- 컨트롤 영역 -->
+    <!-- 독립 조작 컨트롤 패널 영역 -->
     <div id="controlArea" class="hidden">
       <div id="btnLeft" class="arrow-btn">◀</div>
       
-      <!-- 조이스틱 영역 -->
+      <!-- 상하좌우 지원 조이스틱 -->
       <div id="joystickArea">
         <div id="joystickKnob"></div>
       </div>
@@ -672,7 +673,8 @@
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
       if (player) {
-        player.y = canvas.height - player.height - 60;
+        // 비행기 초기 위치 (컨트롤 UI 바로 위)
+        player.y = canvas.height - player.height - 180;
       }
     }
 
@@ -719,7 +721,10 @@
 
     let touchLeftPressed = false;
     let touchRightPressed = false;
-    let joystickAxisX = 0; // -1 (왼쪽) ~ 1 (오른쪽) 조이스틱 방향값
+    
+    // 조이스틱 X/Y 전방향 축 값 (-1.0 ~ 1.0)
+    let joystickAxisX = 0; 
+    let joystickAxisY = 0; 
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -790,24 +795,35 @@
     btnRight.addEventListener("mousedown", () => { touchRightPressed = true; btnRight.classList.add("pressed"); });
     btnRight.addEventListener("mouseup", () => { touchRightPressed = false; btnRight.classList.remove("pressed"); });
 
-    // --- 조이스틱 이벤트 로직 ---
+    // --- 상하좌우(360도) 조이스틱 구현 ---
     let joystickTouchId = null;
 
-    function handleJoystickMove(clientX) {
+    function handleJoystickMove(clientX, clientY) {
       const rect = joystickArea.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
-      const maxDistance = rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const maxRadius = rect.width / 2;
 
       let deltaX = clientX - centerX;
-      deltaX = Math.max(-maxDistance, Math.min(maxDistance, deltaX));
+      let deltaY = clientY - centerY;
+      
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-      joystickKnob.style.transform = `translateX(${deltaX}px)`;
-      joystickAxisX = deltaX / maxDistance; // -1.0 ~ 1.0 값 설정
+      if (distance > maxRadius) {
+        deltaX = (deltaX / distance) * maxRadius;
+        deltaY = (deltaY / distance) * maxRadius;
+      }
+
+      joystickKnob.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+      
+      joystickAxisX = deltaX / maxRadius; // -1.0 ~ 1.0
+      joystickAxisY = deltaY / maxRadius; // -1.0 ~ 1.0
     }
 
     function resetJoystick() {
-      joystickKnob.style.transform = `translateX(0px)`;
+      joystickKnob.style.transform = `translate(0px, 0px)`;
       joystickAxisX = 0;
+      joystickAxisY = 0;
       joystickTouchId = null;
     }
 
@@ -817,7 +833,7 @@
       if (joystickTouchId === null && e.changedTouches.length > 0) {
         const touch = e.changedTouches[0];
         joystickTouchId = touch.identifier;
-        handleJoystickMove(touch.clientX);
+        handleJoystickMove(touch.clientX, touch.clientY);
       }
     });
 
@@ -825,7 +841,7 @@
       e.preventDefault();
       for (let i = 0; i < e.touches.length; i++) {
         if (e.touches[i].identifier === joystickTouchId) {
-          handleJoystickMove(e.touches[i].clientX);
+          handleJoystickMove(e.touches[i].clientX, e.touches[i].clientY);
           break;
         }
       }
@@ -848,11 +864,11 @@
     joystickArea.addEventListener("mousedown", (e) => {
       initAudio();
       isMouseDownJoystick = true;
-      handleJoystickMove(e.clientX);
+      handleJoystickMove(e.clientX, e.clientY);
     });
     window.addEventListener("mousemove", (e) => {
       if (isMouseDownJoystick) {
-        handleJoystickMove(e.clientX);
+        handleJoystickMove(e.clientX, e.clientY);
       }
     });
     window.addEventListener("mouseup", () => {
@@ -1098,7 +1114,7 @@
       startBGM();
 
       player.x = canvas.width / 2 - player.width / 2;
-      player.y = canvas.height - player.height - 60;
+      player.y = canvas.height - player.height - 180; // 독립 UI 패널 위쪽 위치
 
       score = 0;
       stage = 1;
@@ -1288,17 +1304,27 @@
         nextBossKillTarget += 20;
       }
 
-      // 키보드, 버튼, 조이스틱 입력 결합
+      // 키보드, 버튼, 조이스틱 입력 결합 (상하좌우 계산)
       let moveX = 0;
+      let moveY = 0;
+
       if (keys["ArrowLeft"] || keys["KeyA"] || touchLeftPressed) moveX -= 1;
       if (keys["ArrowRight"] || keys["KeyD"] || touchRightPressed) moveX += 1;
-      
-      if (joystickAxisX !== 0) {
-        moveX += joystickAxisX;
-      }
+      if (keys["ArrowUp"] || keys["KeyW"]) moveY -= 1;
+      if (keys["ArrowDown"] || keys["KeyS"]) moveY += 1;
+
+      if (joystickAxisX !== 0) moveX += joystickAxisX;
+      if (joystickAxisY !== 0) moveY += joystickAxisY;
 
       player.x += moveX * player.speed;
+      player.y += moveY * player.speed;
+
+      // X축 경계한계
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+      
+      // Y축 경계한계 (상단: 0, 하단: 컨트롤 패널 영역(160px) 바로 위 침범 방지)
+      const maxPlayerY = canvas.height - player.height - 160;
+      player.y = Math.max(0, Math.min(maxPlayerY, player.y));
 
       // 탄환 업데이트
       for (let i = bullets.length - 1; i >= 0; i--) {
