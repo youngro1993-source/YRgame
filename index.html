@@ -243,8 +243,9 @@
           👾 몬스터 처치 시 점수 2배 보너스!<br>
           👹 20마리마다 대형 보스 출현! (HP: 5)<br>
           💥 보스 처치 시 점수 2배 & 5개로 분해!<br>
-          🔷 총알 아이템: 동시에 3발 발사!<br>
-          📈 시간이 지날수록 난이도 상승!
+          🔷 총알 아이템: 동시에 여러 발 발사!<br>
+          📈 시간이 지날수록 난이도 상승!<br>
+          ⚠️ 몬스터에 닿으면 게임 오버!
         </p>
         <br>
         <input type="text" id="nicknameInput" placeholder="닉네임 입력" maxlength="8">
@@ -424,7 +425,7 @@
           height: 14, 
           speed: 8 
         });
-      } else if (bulletCount >= 3) {
+      } else if (bulletCount === 3) {
         bullets.push({ 
           x: player.x + player.width / 2 - 25, 
           y: player.y, 
@@ -441,6 +442,114 @@
         });
         bullets.push({ 
           x: player.x + player.width / 2 + 19, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+      } else if (bulletCount === 4) {
+        bullets.push({ 
+          x: player.x + player.width / 2 - 35, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 - 15, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 9, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 29, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+      } else if (bulletCount === 5) {
+        bullets.push({ 
+          x: player.x + player.width / 2 - 45, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 - 25, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 - 3, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 19, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 39, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+      } else if (bulletCount >= 6) {
+        bullets.push({ 
+          x: player.x + player.width / 2 - 55, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 - 35, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 - 15, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 9, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 29, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 49, 
           y: player.y, 
           width: 6, 
           height: 14, 
@@ -560,9 +669,9 @@
 
       player.width = Math.min(40, canvas.width * 0.1);
       player.height = Math.min(24, canvas.height * 0.04);
-      player.speed = Math.min(6, canvas.width * 0.015);
+      player.speed = 3; // 속도를 고정값으로 설정 (느리게)
       player.x = (canvas.width - player.width) / 2;
-      player.y = (canvas.height - player.height) / 2;
+      player.y = canvas.height - player.height - 10; // 맨 하단에서 시작
 
       startScreen.style.display = "none";
       rankScreen.style.display = "none";
@@ -672,7 +781,7 @@
           item.y < player.y + player.height &&
           item.y + 15 > player.y
         ) {
-          bulletCount = Math.min(bulletCount + 1, 3);
+          bulletCount++;
           items.splice(iIndex, 1);
         }
       }
@@ -682,6 +791,17 @@
         monster.y += monster.speed;
 
         if (monster.y + monster.height > canvas.height) {
+          endGame();
+          return;
+        }
+
+        // 플레이어와 몬스터 충돌 감지
+        if (
+          player.x < monster.x + monster.width &&
+          player.x + player.width > monster.x &&
+          player.y < monster.y + monster.height &&
+          player.y + player.height > monster.y
+        ) {
           endGame();
           return;
         }
