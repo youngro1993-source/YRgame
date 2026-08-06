@@ -234,7 +234,9 @@
         <p style="color: #ff007f; font-weight: bold; margin-top: 8px;">
           👾 몬스터 처치 시 점수 2배 보너스!<br>
           👹 20마리마다 대형 보스 출현! (HP: 5)<br>
-          💥 보스 처치 시 점수 2배 & 5개로 분해!
+          💥 보스 처치 시 점수 2배 & 5개로 분해!<br>
+          🔷 총알 아이템: 동시에 3발 발사!<br>
+          📈 시간이 지날수록 난이도 상승!
         </p>
         <br>
         <input type="text" id="nicknameInput" placeholder="닉네임 입력" maxlength="8">
@@ -293,6 +295,7 @@
     let gameAnimationId;
     let gameTime = 0;
     let killCount = 0;
+    let bulletCount = 1; // 동시 발사 총알 개수
 
     const player = { 
       x: 0, 
@@ -304,6 +307,7 @@
     
     let bullets = [];
     let monsters = [];
+    let items = []; // 아이템 배열
     let keys = {};
 
     const joystickContainer = document.getElementById("joystick");
@@ -312,11 +316,9 @@
 
     let joystickActive = false;
     let joystickX = 0;
-    let joystickY = 0;
     let joystickTouchId = null;
 
     const joystickRadius = 40;
-    const containerRadius = 50;
 
     joystickContainer.addEventListener("touchstart", (e) => {
       e.preventDefault();
@@ -343,7 +345,6 @@
         if (touch.identifier === joystickTouchId) {
           joystickActive = false;
           joystickX = 0;
-          joystickY = 0;
           joystickTouchId = null;
           updateJoystickVisuals();
           break;
@@ -357,23 +358,19 @@
       const centerY = rect.top + rect.height / 2;
 
       let dx = touch.clientX - centerX;
-      let dy = touch.clientY - centerY;
-      let distance = Math.sqrt(dx * dx + dy * dy);
+      let distance = Math.abs(dx);
 
       if (distance > joystickRadius) {
-        dx = (dx / distance) * joystickRadius;
-        dy = (dy / distance) * joystickRadius;
+        dx = (dx > 0 ? 1 : -1) * joystickRadius;
       }
 
       joystickX = dx;
-      joystickY = dy;
       updateJoystickVisuals();
     }
 
     function updateJoystickVisuals() {
       const offsetX = (joystickX / joystickRadius) * 25;
-      const offsetY = (joystickY / joystickRadius) * 25;
-      joystickStick.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
+      joystickStick.style.transform = `translate(calc(-50% + ${offsetX}px), -50%)`;
     }
 
     shootBtn.addEventListener("touchstart", (e) => {
@@ -385,13 +382,53 @@
     });
 
     function shoot() {
-      bullets.push({ 
-        x: player.x + player.width / 2 - 3, 
-        y: player.y, 
-        width: 6, 
-        height: 14, 
-        speed: 8 
-      });
+      // 총알 개수에 따라 여러 발 발사
+      if (bulletCount === 1) {
+        bullets.push({ 
+          x: player.x + player.width / 2 - 3, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+      } else if (bulletCount === 2) {
+        bullets.push({ 
+          x: player.x + player.width / 2 - 15, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 9, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+      } else if (bulletCount >= 3) {
+        bullets.push({ 
+          x: player.x + player.width / 2 - 25, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 - 3, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+        bullets.push({ 
+          x: player.x + player.width / 2 + 19, 
+          y: player.y, 
+          width: 6, 
+          height: 14, 
+          speed: 8 
+        });
+      }
     }
 
     document.addEventListener("keydown", (e) => {
@@ -472,6 +509,22 @@
       ctx.fill();
     }
 
+    function drawBulletItem(ctx, x, y, size) {
+      ctx.fillStyle = "#00d4ff";
+      ctx.strokeStyle = "#00f0ff";
+      ctx.lineWidth = 2;
+      
+      // 다이아몬드 모양
+      ctx.beginPath();
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x, y + size);
+      ctx.lineTo(x - size, y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
     function startGame() {
       const inputVal = nicknameInput.value.trim();
       if (!inputVal) {
@@ -482,15 +535,17 @@
       score = 0;
       gameTime = 0;
       killCount = 0;
+      bulletCount = 1;
       isGameOver = false;
       bullets = [];
       monsters = [];
+      items = [];
 
       player.width = Math.min(40, canvas.width * 0.1);
       player.height = Math.min(24, canvas.height * 0.04);
       player.speed = Math.min(6, canvas.width * 0.015);
       player.x = (canvas.width - player.width) / 2;
-      player.y = canvas.height - player.height - 90;
+      player.y = canvas.height - player.height - 10; // 맨 하단부터 시작
 
       startScreen.style.display = "none";
       rankScreen.style.display = "none";
@@ -506,16 +561,20 @@
       update();
       render();
 
-      let spawnProbability = 0.015 + Math.min(0.06, gameTime * 0.000015);
+      // 난이도 상승: 시간에 따라 몬스터 스폰 확률 증가
+      let spawnProbability = 0.015 + Math.min(0.08, gameTime * 0.00002); // 더 빠르게 상승
       
       if (Math.random() < spawnProbability) {
+        // 난이도에 따라 몬스터 속도 증가
+        let speedMultiplier = 1 + (gameTime * 0.0001);
+        
         monsters.push({
           isBoss: false,
           x: Math.random() * (canvas.width - 32),
           y: -35,
           width: 32,
           height: 32,
-          speed: 1.0 + Math.random() * 0.5,
+          speed: (1.0 + Math.random() * 0.5) * speedMultiplier,
           baseScore: 10,
           hp: 1
         });
@@ -557,6 +616,7 @@
         player.x += player.speed;
       }
 
+      // 미사일 이동
       for (let bIndex = bullets.length - 1; bIndex >= 0; bIndex--) {
         let bullet = bullets[bIndex];
         bullet.y -= bullet.speed;
@@ -565,6 +625,29 @@
         }
       }
 
+      // 아이템 이동 및 플레이어 충돌
+      for (let iIndex = items.length - 1; iIndex >= 0; iIndex--) {
+        let item = items[iIndex];
+        item.y += item.speed;
+
+        if (item.y > canvas.height) {
+          items.splice(iIndex, 1);
+          continue;
+        }
+
+        // 플레이어와 아이템 충돌
+        if (
+          item.x < player.x + player.width &&
+          item.x + 15 > player.x &&
+          item.y < player.y + player.height &&
+          item.y + 15 > player.y
+        ) {
+          bulletCount = Math.min(bulletCount + 1, 3); // 최대 3발
+          items.splice(iIndex, 1);
+        }
+      }
+
+      // 몬스터 이동 및 충돌
       for (let mIndex = monsters.length - 1; mIndex >= 0; mIndex--) {
         let monster = monsters[mIndex];
         monster.y += monster.speed;
@@ -609,6 +692,17 @@
               } else {
                 score += monster.baseScore * 2;
                 killCount++;
+                
+                // 30점마다 총알 아이템 드롭 (확률 30%)
+                if (Math.random() < 0.3) {
+                  items.push({
+                    x: monster.x + monster.width / 2 - 7,
+                    y: monster.y,
+                    width: 15,
+                    height: 15,
+                    speed: 1.5
+                  });
+                }
               }
 
               monsters.splice(mIndex, 1);
@@ -634,6 +728,11 @@
       ctx.fillStyle = "#ffeb3b";
       bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
 
+      // 아이템 그리기
+      items.forEach(item => {
+        drawBulletItem(ctx, item.x + 7.5, item.y + 7.5, 7);
+      });
+
       monsters.forEach(m => {
         if (m.isBoss) {
           drawBossMonster(ctx, m.x, m.y, m.width, m.height, m.hp);
@@ -650,6 +749,10 @@
       
       ctx.fillStyle = "#ff007f";
       ctx.fillText(`보스: ${killCount}/20`, canvas.width - 100, fontSize + 5);
+      
+      // 총알 개수 표시
+      ctx.fillStyle = "#00d4ff";
+      ctx.fillText(`총알: ${bulletCount}발`, 12, fontSize * 3 + 5);
     }
 
     function endGame() {
